@@ -83,8 +83,8 @@ def get_today():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
-def get_duration_in_seconds(start_time_millis, end_time_millis):
-    return round((end_time_millis - start_time_millis) * 1000, 2)
+def get_duration_in_seconds(start_time_in_millis, end_time_in_millis):
+    return round((end_time_in_millis - start_time_in_millis) * 1000, 2)
 
 
 if len(args) == 0:

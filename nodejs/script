@@ -17,10 +17,9 @@ OPTIONS:
   -u, --uppercase         Uppercase the <NAME>
   -p, --prefix <PREFIX>   Change the greeting prefix`;
 
-let startTime = process.hrtime()[1];
-let args = process.argv.slice(2);
+const startTime = process.hrtime()[1];
+const args = process.argv.slice(2);
 let skipNextIteration = false;
-let seperatorIndex = null;
 
 let uppercaseOption = false;
 let prefixOption = 'Hello';
