@@ -1,5 +1,13 @@
 # Rosetta Stone CLI: Write the Same Option Parser Script in Bash, Python, NodeJS, and Groovy
 
-**Sister article:** TODO
+## Sister Article
 
-Test it: `./test.sh`
+TODO
+
+## Test
+
+Run the tests, which are [TAP-compliant](https://testanything.org/)
+
+```
+./test.sh
+```

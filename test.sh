@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+RED_COLOR="$(tput setaf 1)"
+GREEN_COLOR="$(tput setaf 2)"
+RESET_COLOR="$(tput sgr0)"
+
 DIRS=(
   "bash"
   "python"
@@ -17,18 +21,22 @@ TESTS=(
   "test_piped_stdin"
 )
 
+counter=0
+
+increment_counter() {
+  counter=$(expr ${counter} + 1)
+}
+
+get_total_tests_size() {
+  local dirs_size=${#DIRS[@]}
+  local tests_size=${#TESTS[@]}
+  local total_tests_size=$(expr ${dirs_size} \* ${tests_size})
+  echo ${total_tests_size}
+}
+
 get_today() {
   echo "$(date '+%F')"
 }
-
-delete_last_line() {
-  local input="${1}"
-  echo "${input}" | sed '$d'
-}
-
-RED_COLOR="$(tput setaf 1)"
-GREEN_COLOR="$(tput setaf 2)"
-RESET_COLOR="$(tput sgr0)"
 
 is_ok() {
   local dir="${1}"
@@ -45,7 +53,7 @@ is_ok() {
   else
     status="${RED_COLOR}not ok${RESET_COLOR}"
   fi
-  echo "${status} ${description} for ${dir}"
+  echo "${status} ${counter} ${description} for ${dir}"
 
   if [[ "${debug}" == "true" ]]; then
     echo "exit_code=${exit_code}"
@@ -196,12 +204,13 @@ Completed in"
   is_ok "${dir}" "${description}"  "${exit_code}" "${expected_exit_code}" "${stdout}" "${expected_stdout}" "${debug}"
 }
 
+echo "1..$(get_total_tests_size)"
+
 for dir in ${DIRS[@]}; do
   cd ${dir}
   for t in ${TESTS[@]}; do
+    increment_counter
     ${t} "${dir}"
   done
   cd ..
 done
-
-echo "Completed in ${SECONDS} s"
