@@ -1,0 +1,126 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+
+const SCRIPT_NAME = './script';
+const HELP_USAGE = `For help, run: ${SCRIPT_NAME} --help`;
+const NAME_USAGE = '<NAME> cannot be empty';
+const PREFIX_USAGE = '<PREFIX> cannot be empty';
+const USAGE = `\
+Usage:
+  ${SCRIPT_NAME} [OPTIONS] -- <NAME>
+
+${NAME_USAGE}
+
+OPTIONS:
+  -h, --help              Show this help
+  -u, --uppercase         Uppercase the <NAME>
+  -p, --prefix <PREFIX>   Change the greeting prefix`;
+
+let startTime = process.hrtime()[1];
+let args = process.argv.slice(2);
+let skipNextIteration = false;
+let seperatorIndex = null;
+
+let uppercaseOption = false;
+let prefixOption = 'Hello';
+let nameArg = '';
+let backwardsName = '';
+let today = '';
+let output = '';
+let duration = null;
+
+const handleHelp = () => {
+  console.log(USAGE);
+  process.exit(0);
+};
+
+const die = () => {
+  console.log(HELP_USAGE);
+  process.exit(1);
+};
+
+const handleUnknownOption = (option) => {
+  console.log(`Unknown option: ${option}`);
+  die();
+};
+
+const handleEmptyArg = (argUsage) => {
+  console.log(argUsage);
+  die();
+};
+
+const getPrefixOption = (index) => {
+  if (args[index]) {
+    return args[index];
+  }
+  handleEmptyArg(PREFIX_USAGE);
+};
+
+const getNameArg = (index) => {
+  if (args[index]) {
+    return args[index];
+  }
+  return '';
+};
+
+const pipedStdinExists = () => !process.stdin.isTTY;
+
+const getPipedStdin = () => fs.readFileSync(0).toString().trim();
+
+const reverseString = (str) => str.split('').reverse().join('');
+
+const getToday = () => new Date().toISOString().split('T')[0];
+
+const getDurationInSeconds = (startTimeInNanos, endTimeInNanos) =>
+  ((endTimeInNanos - startTimeInNanos) / 10_000_000).toFixed(2);
+
+if (args.length === 0) {
+  handleEmptyArg(NAME_USAGE);
+}
+
+for (const [i, arg] of args.entries()) {
+  if (skipNextIteration) {
+    skipNextIteration = false;
+    continue;
+  } else if (arg === '-h' || arg === '--help') {
+    handleHelp();
+  } else if (arg === '-u' || arg === '--uppercase') {
+    uppercaseOption = true;
+  } else if (arg === '-p' || arg === '--prefix') {
+    prefixOption = getPrefixOption(i + 1);
+    skipNextIteration = true;
+    continue;
+  } else if (arg === '--') {
+    nameArg = getNameArg(i + 1);
+    break;
+  } else {
+    handleUnknownOption(arg);
+  }
+}
+
+if (pipedStdinExists()) {
+  nameArg = getPipedStdin();
+}
+
+if (nameArg === '') {
+  handleEmptyArg(NAME_USAGE);
+}
+
+if (uppercaseOption) {
+  nameArg = nameArg.toUpperCase();
+}
+
+backwardsName = reverseString(nameArg);
+today = getToday();
+
+output = `\
+${prefixOption}, ${nameArg}
+Your name backwards is ${backwardsName}
+Today is ${today}`;
+
+console.log(output);
+
+duration = getDurationInSeconds(startTime, process.hrtime()[1]);
+
+console.log(`Completed in ${duration} s`);

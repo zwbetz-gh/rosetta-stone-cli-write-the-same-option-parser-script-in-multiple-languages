@@ -1,4 +1,4 @@
-# Rosetta Stone CLI: Write the Same Option Parser Script in Bash, Python, NodeJS, and Groovy
+# Rosetta Stone CLI: Write the Same Option Parser Script in Bash, Python, and NodeJS
 
 ## Sister Article
 

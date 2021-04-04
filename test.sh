@@ -7,6 +7,7 @@ RESET_COLOR="$(tput sgr0)"
 DIRS=(
   "bash"
   "python"
+  "nodejs"
 )
 
 TESTS=(
@@ -18,6 +19,7 @@ TESTS=(
   "test_name"
   "test_short_options"
   "test_long_options"
+  "test_piped_stdin_empty_separator"
   "test_piped_stdin"
 )
 
@@ -35,7 +37,7 @@ get_total_tests_size() {
 }
 
 get_today() {
-  echo "$(date '+%F')"
+  echo "$(date -u '+%F')"
 }
 
 is_ok() {
@@ -188,6 +190,20 @@ Completed in"
   is_ok "${dir}" "${description}"  "${exit_code}" "${expected_exit_code}" "${stdout}" "${expected_stdout}" "${debug}"
 }
 
+test_piped_stdin_empty_separator() {
+  local dir="${1}"
+  local description="test_piped_stdin_empty_separator"
+  echo "sample stdin" | ./script > /dev/null
+  local exit_code="${?}"
+  local expected_exit_code="1"
+  local stdout="$(echo "sample stdin" | ./script)"
+  local expected_stdout="\
+<NAME> cannot be empty
+For help, run: ./script --help"
+  local debug="false"
+  is_ok "${dir}" "${description}"  "${exit_code}" "${expected_exit_code}" "${stdout}" "${expected_stdout}" "${debug}"
+}
+
 test_piped_stdin() {
   local dir="${1}"
   local description="test_piped_stdin"
@@ -198,7 +214,7 @@ test_piped_stdin() {
   local expected_stdout="\
 Woah, SAMPLE STDIN
 Your name backwards is NIDTS ELPMAS
-Today is 2021-04-03
+Today is $(get_today)
 Completed in"
   local debug="false"
   is_ok "${dir}" "${description}"  "${exit_code}" "${expected_exit_code}" "${stdout}" "${expected_stdout}" "${debug}"

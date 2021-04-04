@@ -2,7 +2,7 @@
 
 import sys
 import time
-import datetime
+from datetime import datetime, timezone
 
 SCRIPT_NAME = "./script"
 HELP_USAGE = "For help, run: {0} --help"
@@ -26,7 +26,7 @@ seperator_index = None
 
 uppercase_option = False
 prefix_option = "Hello"
-name = ""
+name_arg = ""
 backwards_name = ""
 today = ""
 output = ""
@@ -43,8 +43,13 @@ def die():
     sys.exit(1)
 
 
-def handle_unknown_option(arg):
-    print("Unknown option: {0}".format(arg))
+def handle_unknown_option(option):
+    print("Unknown option: {0}".format(option))
+    die()
+
+
+def handle_empty_arg(arg_usage):
+    print(arg_usage)
     die()
 
 
@@ -52,44 +57,41 @@ def get_prefix_option(index):
     try:
         return args[index]
     except IndexError:
-        print(PREFIX_USAGE)
-        die()
+        handle_empty_arg(PREFIX_USAGE)
 
 
-def handle_name_usage():
-    print(NAME_USAGE)
-    die()
-
-
-def get_name(index):
+def get_name_arg(index):
     try:
         return args[index]
     except IndexError:
         return ""
 
 
-def stdin_exists():
+def piped_stdin_exists():
     return not sys.stdin.isatty()
 
 
-def get_stdin():
+def get_piped_stdin():
     return sys.stdin.read().strip()
 
 
-def reverse(str):
+def reverse_string(str):
     return str[::-1]
 
 
 def get_today():
-    return datetime.date.today().strftime("%Y-%m-%d")
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
-def get_duration_in_seconds(start_time, end_time):
-    return round((end_time - start_time) * 1000, 2)
+def get_duration_in_seconds(start_time_millis, end_time_millis):
+    return round((end_time_millis - start_time_millis) * 1000, 2)
 
+
+if len(args) == 0:
+    handle_empty_arg(NAME_USAGE)
 
 for i, arg in enumerate(args):
-    if skip_next_iteration == True:
+    if skip_next_iteration:
         skip_next_iteration = False
         continue
     elif arg == "-h" or arg == "--help":
@@ -101,21 +103,21 @@ for i, arg in enumerate(args):
         skip_next_iteration = True
         continue
     elif arg == "--":
-        name = get_name(i + 1)
+        name_arg = get_name_arg(i + 1)
         break
     else:
         handle_unknown_option(arg)
 
-if stdin_exists():
-    name = get_stdin()
+if piped_stdin_exists():
+    name_arg = get_piped_stdin()
 
-if name == "":
-    handle_name_usage()
+if name_arg == "":
+    handle_empty_arg(NAME_USAGE)
 
 if uppercase_option == True:
-    name = name.upper()
+    name_arg = name_arg.upper()
 
-backwards_name = reverse(name)
+backwards_name = reverse_string(name_arg)
 today = get_today()
 
 output = """\
@@ -123,7 +125,7 @@ output = """\
 Your name backwards is {2}
 Today is {3}"""
 
-print(output.format(prefix_option, name, backwards_name, today))
+print(output.format(prefix_option, name_arg, backwards_name, today))
 
 duration = get_duration_in_seconds(start_time, time.time())
 
