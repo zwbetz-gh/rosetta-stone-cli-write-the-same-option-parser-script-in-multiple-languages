@@ -37,7 +37,7 @@ get_total_tests_size() {
 }
 
 get_today() {
-  echo "$(date -u '+%F')"
+  date -u '+%F'
 }
 
 is_ok() {
